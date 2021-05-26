@@ -1,5 +1,5 @@
 CC=clang
 CFLAGS= -Wall -Wextra -pedantic
 
-main: *.c
-	$(CC) main.c -o main
+main: *.c *h
+	$(CC) main.c -o grope

@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <malloc.h>
-
-typedef struct {
-	unsigned int len;
-	char* word;
-} KEYWORD;
+#include "util.h"
 
 char* read_file(const char* filename, int* len)
 {
@@ -23,27 +15,26 @@ char* read_file(const char* filename, int* len)
 	return buff;
 }
 
-bool check(char* text, int file_len, KEYWORD keyword)
+bool check(MATCH* matches, unsigned int* match_len, KEYWORD keyword, char* text, char* filename, unsigned int file_len)
 {
 	bool ret = false;
+	unsigned int row = 1, column = 0;
 	for (int i = 0; i <= file_len; i++) {
-		printf("%d\n", text[i]);
+//		printf("%d\n", text[i]);
+		if (text[i] == '\n') { row++; column = 0; continue; }
+		column++;
 		if (keyword.word[0] == text[i]) {
-			printf("letter match at %d\n", i);
-			
 			for (int j = 1; j < keyword.len; j++) {
 				if (keyword.word[j] != text[i+j]) {
 					ret = false;
 				}
 				else {
-					printf("letter match at %d\n", i+j);
 					ret = true;
 				}
 			}
 			
 			if (ret) {
-				printf("match found at: %d\n", i);
-				return true;
+				append_match(&matches, match_len, keyword.word, filename, row, column);
 			}
 			
 		}
@@ -51,8 +42,11 @@ bool check(char* text, int file_len, KEYWORD keyword)
 	return false;
 }
 
+
 int main(int argc, char** argv)
 {
+	unsigned int match_len = 1;
+	MATCH* matches = malloc(20*sizeof(MATCH));
 	KEYWORD keyword;
 	int file_len = 0;
 	if (argc == 1) {
@@ -73,7 +67,7 @@ int main(int argc, char** argv)
 		char* text = read_file(argv[i], &file_len);
 		// printf("text: %s\n", text);
 		printf("filelen: %d\n", file_len);
-		printf("check: %d\n", check(text, file_len, keyword));
+		printf("check: %d\n", check(matches, &match_len, keyword, text, argv[i], file_len));
 	}
 	printf("done\n");
 	return 0;

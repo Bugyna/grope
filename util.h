@@ -15,9 +15,9 @@ typedef struct {
 } MATCH;
 
 
-void append_match(MATCH** matches, unsigned int* match_len, char* word, char* filename, unsigned int row, unsigned int column)
+void append_match(MATCH** matches, unsigned int* match_len, char* word, char* filename, unsigned int row, unsigned int column, char* line)
 {
-	printf("match found at: %d. %d\n", row, column);
+	printf("match found at: %d.%d:%s\n", row, column, line);
 //	printf("match_len i: %d", *match_len);
 //	unsigned int i = *match_len;
 //	matches[i]->row = row;

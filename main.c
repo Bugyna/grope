@@ -1,5 +1,11 @@
 #include "util.h"
 
+void append_line(char* line, char c, unsigned int column)
+{
+	line = realloc(line, column+1);
+	line[column] = c;
+}
+
 char* read_file(const char* filename, int* len)
 {
 	FILE* file = fopen(filename, "r");
@@ -15,18 +21,23 @@ char* read_file(const char* filename, int* len)
 	return buff;
 }
 
-bool check(MATCH* matches, unsigned int* match_len, KEYWORD keyword, char* text, char* filename, unsigned int file_len)
+void check(MATCH* matches, unsigned int* match_len, KEYWORD keyword, char* text, char* filename, unsigned int file_len)
 {
 	bool ret = false;
 	unsigned int row = 1, column = 0;
-	for (int i = 0; i <= file_len; i++) {
-//		printf("%d\n", text[i]);
-		if (text[i] == '\n') { row++; column = 0; continue; }
-		column++;
+	char* line = malloc(2);
+	int i = -1;
+	for (;;) {
+		i++;
+		if (i >= file_len) { return; }
+		append_line(line, text[i], column++);
+		if (text[i] == '\n') { row++; column = 0; line = realloc(line, 2); continue; }
 		if (keyword.word[0] == text[i]) {
 			for (int j = 1; j < keyword.len; j++) {
-				if (keyword.word[j] != text[i+j]) {
-					ret = false;
+				i++;
+				append_line(line, text[i], column++);
+				if (keyword.word[j] != text[i]) {
+					ret = false; break;
 				}
 				else {
 					ret = true;
@@ -34,12 +45,11 @@ bool check(MATCH* matches, unsigned int* match_len, KEYWORD keyword, char* text,
 			}
 			
 			if (ret) {
-				append_match(&matches, match_len, keyword.word, filename, row, column);
-			}
-			
+				append_match(&matches, match_len, keyword.word, filename, row, column, line);
+				i++;
+			}	
 		}
 	}
-	return false;
 }
 
 
@@ -65,9 +75,8 @@ int main(int argc, char** argv)
 	
 	for (int i = 2; i < argc; i++) {
 		char* text = read_file(argv[i], &file_len);
-		// printf("text: %s\n", text);
-		printf("filelen: %d\n", file_len);
-		printf("check: %d\n", check(matches, &match_len, keyword, text, argv[i], file_len));
+		printf("%s\n", argv[i]);
+		check(matches, &match_len, keyword, text, argv[i], file_len);
 	}
 	printf("done\n");
 	return 0;
